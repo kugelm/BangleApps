@@ -224,6 +224,13 @@ exports.addInteractive = function(menu, options) {
       options.menuB = b;
     }
   }
+  const save = () => {
+    // save the currently showing clock_info
+    const settings = exports.loadSettings();
+    settings.apps[appName] = {a:options.menuA, b:options.menuB};
+    require("Storage").writeJSON("clock_info.json",settings);
+  };
+  E.on("kill", save);
 
   if (options.menuA===undefined) options.menuA = 0;
   if (options.menuB===undefined) options.menuB = Math.min(exports.loadCount, menu[options.menuA].items.length)-1;
@@ -234,7 +241,7 @@ exports.addInteractive = function(menu, options) {
     options.redrawHandler = ()=>drawItem(itm);
     itm.on('redraw', options.redrawHandler);
     itm.uses = (0|itm.uses)+1;
-    if (itm.uses==1) itm.show();
+    if (itm.uses==1) itm.show(options);
     itm.emit("redraw");
   }
   function menuHideItem(itm) {
@@ -242,7 +249,7 @@ exports.addInteractive = function(menu, options) {
     delete options.redrawHandler;
     itm.uses--;
     if (!itm.uses)
-      itm.hide();
+      itm.hide(options);
   }
   // handling for swipe between menu items
   function swipeHandler(lr,ud){
@@ -276,46 +283,51 @@ exports.addInteractive = function(menu, options) {
       oldMenuItem.removeAllListeners("draw");
       menuShowItem(menu[options.menuA].items[options.menuB]);
     }
-    // save the currently showing clock_info
-    let settings = exports.loadSettings();
-    settings.apps[appName] = {a:options.menuA,b:options.menuB};
-    require("Storage").writeJSON("clock_info.json",settings);
     // On 2v18+ firmware we can stop other event handlers from being executed since we handled this
     E.stopEventPropagation&&E.stopEventPropagation();
   }
   Bangle.on("swipe",swipeHandler);
+  const blur = () => {
+    options.focus=false;
+    delete Bangle.CLKINFO_FOCUS;
+    const itm = menu[options.menuA].items[options.menuB];
+    let redraw = true;
+    if (itm.blur && itm.blur(options) === false)
+      redraw = false;
+    if (redraw) options.redraw();
+  };
+  const focus = () => {
+    let redraw = true;
+    Bangle.CLKINFO_FOCUS=true;
+    if (!options.focus) {
+      options.focus=true;
+      const itm = menu[options.menuA].items[options.menuB];
+      if (itm.focus && itm.focus(options) === false)
+        redraw = false;
+    }
+    if (redraw) options.redraw();
+  };
   let touchHandler, lockHandler;
   if (options.x!==undefined && options.y!==undefined && options.w && options.h) {
     touchHandler = function(_,e) {
       if (e.x<options.x || e.y<options.y ||
           e.x>(options.x+options.w) || e.y>(options.y+options.h)) {
-        if (options.focus) {
-          options.focus=false;
-          delete Bangle.CLKINFO_FOCUS;
-          options.redraw();
-        }
+        if (options.focus)
+          blur();
         return; // outside area
       }
       if (!options.focus) {
-        options.focus=true; // if not focussed, set focus
-        Bangle.CLKINFO_FOCUS=true;
-        options.redraw();
+        focus();
       } else if (menu[options.menuA].items[options.menuB].run) {
         Bangle.buzz(100, 0.7);
-        menu[options.menuA].items[options.menuB].run(); // allow tap on an item to run it (eg home assistant)
-      } else {
-        options.focus=true;
-        Bangle.CLKINFO_FOCUS=true;
+        menu[options.menuA].items[options.menuB].run(options); // allow tap on an item to run it (eg home assistant)
       }
     };
     Bangle.on("touch",touchHandler);
     if (settings.defocusOnLock) {
       lockHandler = function() {
-        if(options.focus) {
-          options.focus=false;
-          delete Bangle.CLKINFO_FOCUS;
-          options.redraw();
-        }
+        if(options.focus)
+          blur();
       };
       Bangle.on("lock", lockHandler);
     }
@@ -324,6 +336,8 @@ exports.addInteractive = function(menu, options) {
   menuShowItem(menu[options.menuA].items[options.menuB]);
   // return an object with info that can be used to remove the info
   options.remove = function() {
+    save();
+    E.removeListener("kill", save);
     Bangle.removeListener("swipe",swipeHandler);
     if (touchHandler) Bangle.removeListener("touch",touchHandler);
     if (lockHandler) Bangle.removeListener("lock", lockHandler);
@@ -352,6 +366,7 @@ exports.addInteractive = function(menu, options) {
 
     return true;
   };
+  if (options.focus) focus();
   delete settings; // don't keep settings in RAM - save space
   return options;
 };
