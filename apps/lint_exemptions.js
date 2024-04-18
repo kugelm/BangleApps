@@ -59,13 +59,6 @@ module.exports = {
       "no-unused-vars"
     ]
   },
-  "sleeplog/settings.js": {
-    "hash": "bd5e3e1382321df6682ef1cb718b0e15ab355422bef77278eb086f213f643021",
-    "rules": [
-      "no-unused-vars",
-      "no-undef"
-    ]
-  },
   "showimg/app.js": {
     "hash": "71cbbaa488e2d08c5bf28f7d56178d5e7694eb9761cd4752bbc9733e825d4bcf",
     "rules": [
@@ -84,12 +77,6 @@ module.exports = {
     "rules": [
       "no-unused-vars",
       "no-undef"
-    ]
-  },
-  "recorder/app.js": {
-    "hash": "64c838b63a756a712555ae54d0bae89f0373ce317c289f7b19a583d3f91d473b",
-    "rules": [
-      "no-unused-vars"
     ]
   },
   "podadrem/app.js": {
@@ -277,13 +264,6 @@ module.exports = {
   },
   "widagps/widget.js": {
     "hash": "a58cdc481962575ef0aa0bfaedcc1f9de3ce966218c5b16168d8ed8b4b9672b8",
-    "rules": [
-      "no-unused-vars",
-      "no-undef"
-    ]
-  },
-  "sleeplog/app.js": {
-    "hash": "336da552e4b04677447cf76a253b40bc259a597ea11d455121933f93afe99794",
     "rules": [
       "no-unused-vars",
       "no-undef"
@@ -568,13 +548,6 @@ module.exports = {
       "no-undef"
     ]
   },
-  "sleeplog/lib.js": {
-    "hash": "755e0d4c02b92181281fd6990df39c9446c73ff896b50b64d7e14cb1c0188556",
-    "rules": [
-      "no-unused-vars",
-      "no-undef"
-    ]
-  },
   "doztime/app-bangle1.js": {
     "hash": "1e9598c201175180ae77d1c3bc47e8138b339b72eb58782b5057fb7aefdc88a1",
     "rules": [
@@ -672,12 +645,6 @@ module.exports = {
       "no-undef"
     ]
   },
-  "taglaunch/app.js": {
-    "hash": "944689f0600e59bbe4d9e5e2684baeefabe4457a6edd938aae451dc4cd659ad3",
-    "rules": [
-      "no-undef"
-    ]
-  },
   "tabanchi/app.js": {
     "hash": "6ad6dc1d6b0f539f9f659d5773b5a26d19eb6dacafe7b4682469e6f3c412647e",
     "rules": [
@@ -768,12 +735,6 @@ module.exports = {
       "no-undef"
     ]
   },
-  "sleeplog/boot.js": {
-    "hash": "b4c9d8e3c3e7cdf44ea10e29a9e3b53f958b86c21ca91d88e4efb85901c3bde9",
-    "rules": [
-      "no-undef"
-    ]
-  },
   "scicalc/app.js": {
     "hash": "416c7b2eb12a5d10bcc3a99d89d8f6f54ecd2b47cce2d1f4d55c3e3bc602b31a",
     "rules": [
@@ -800,12 +761,6 @@ module.exports = {
   },
   "regattatimer/app.js": {
     "hash": "8d579cc62d82599f776e5e230651f03481f18c3934f35f4fedfb6382a46db861",
-    "rules": [
-      "no-undef"
-    ]
-  },
-  "ratchet_launch/app.js": {
-    "hash": "592d432301d7836aa54e288d465ae8952ecb891d628f824ea9f62479a2a01631",
     "rules": [
       "no-undef"
     ]
@@ -1002,12 +957,6 @@ module.exports = {
       "no-undef"
     ]
   },
-  "launch/app.js": {
-    "hash": "7d5b7d7f2adbe4c8c137f76b6560a06437ab142cfeffb3f0ff261f1250a6b687",
-    "rules": [
-      "no-undef"
-    ]
-  },
   "kitchen/stepo2.kit.js": {
     "hash": "b7660bef1a2560f23ff696b03d297cdd39936ca61c01b3d0a316d49f9cf72590",
     "rules": [
@@ -1080,12 +1029,6 @@ module.exports = {
       "no-undef"
     ]
   },
-  "hrm/heartrate.js": {
-    "hash": "beb8e433f10d3639b343b060f0d5583ea665445f92b2171daff7612eaf135596",
-    "rules": [
-      "no-undef"
-    ]
-  },
   "hebrew_calendar/app.js": {
     "hash": "3077d581b9fcf73816e265e61105a0692356b89e8ed41a82be51960ae26fc8de",
     "rules": [
@@ -1094,12 +1037,6 @@ module.exports = {
   },
   "heartzone/app.js": {
     "hash": "0eab7e375ba25992b335a2589f80ce341b830cf0ae206c21eec664883f4e7de0",
-    "rules": [
-      "no-undef"
-    ]
-  },
-  "health/app.js": {
-    "hash": "6d612eed04ee5a844be6ad47c326624cd3e204fecf1c28c99a57ca963b3d7a7b",
     "rules": [
       "no-undef"
     ]
@@ -1118,12 +1055,6 @@ module.exports = {
   },
   "gpssetup/gpssetup.js": {
     "hash": "a63f670f4adf04895e6837270fcf19bd56f0a6d049cfb8e3ad8928c283d1bfd3",
-    "rules": [
-      "no-undef"
-    ]
-  },
-  "gpsinfo/gps-info.js": {
-    "hash": "1eb77f45d4182613879b8214dc174f84c7333b4a541c2b43cba6014a16f470ee",
     "rules": [
       "no-undef"
     ]
@@ -1479,6 +1410,12 @@ module.exports = {
     "rules": [
       "no-undef",
       "no-unused-vars",
+      "no-cond-assign"
+    ]
+  },
+  "kineticscroll/boot.min.js": {
+    "hash": "a5106fa601cdbd2179e32265a8b77e2df62ba44ca0f4b94ce1e594c95a47e20d",
+    "rules": [
       "no-cond-assign"
     ]
   }
