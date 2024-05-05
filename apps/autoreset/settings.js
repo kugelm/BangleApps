@@ -1,12 +1,11 @@
 (function(back) {
-  var FILE = 'backswipe.json';
-  // Mode can be 'blacklist', 'whitelist', 'on' or 'disabled'
+  var FILE = 'autoreset.json';
+  // Mode can be 'blacklist' or 'whitelist'
   // Apps is an array of app info objects, where all the apps that are there are either blocked or allowed, depending on the mode
   var DEFAULTS = {
     'mode': 0,
     'apps': [],
-    'standardNumSwipeHandlers': 0,
-    'standardNumDragHandlers': 0
+    'timeout': 10
   };
 
   var settings = {};
@@ -42,51 +41,40 @@
 
   var showMenu = function() {
     var menu = {
-      '': { 'title': 'Backswipe' },
-      '< Back': () => {
+      '': { 'title': 'Auto Reset' },
+      /*LANG*/'< Back': () => {
         back();
       },
-      'Mode': {
+      /*LANG*/'Mode': {
         value: settings.mode,
         min: 0,
-        max: 3,
-        format: v => ["Blacklist", "Whitelist", "Always On", "Disabled"][v],
+        max: 1,
+        format: v => ["Blacklist", "Whitelist"][v],
         onchange: v => {
           settings.mode = v;
           saveSettings(settings);
         },
       },
-      'App List': () => {
+      /*LANG*/'App List': () => {
         showAppSubMenu();
       },
-      'Standard # of swipe handlers' : { // If more than this many handlers are present backswipe will not go back
-        value: 0|settings.standardNumSwipeHandlers,
-        min: 0,
-        max: 10,
-        format: v=>v,
+      /*LANG*/'Timeout [min]': {
+        value: settings.timeout,
+        min: 0.25, max: 30, step : 0.25,
+        format: v => v,
         onchange: v => {
-          settings.standardNumSwipeHandlers = v;
+          settings.timeout = v;
           saveSettings(settings);
         },
       },
-      'Standard # of drag handlers' : { // If more than this many handlers are present backswipe will not go back
-        value: 0|settings.standardNumDragHandlers,
-        min: 0,
-        max: 10,
-        format: v=>v,
-        onchange: v => {
-          settings.standardNumDragHandlers = v;
-          saveSettings(settings);
-        },
-      }
     };
 
     E.showMenu(menu);
   };
-  
+
   var showAppSubMenu = function() {
     var menu = {
-      '': { 'title': 'Backswipe' },
+      '': { 'title': 'Auto Reset' },
       '< Back': () => {
         showMenu();
       },
@@ -103,12 +91,12 @@
     });
     E.showMenu(menu);
   }
-  
+
   var showAppList = function() {
     var apps = getApps();
     var menu = {
-      '': { 'title': 'Backswipe' },
-      '< Back': () => {
+      '': { 'title': 'Auto Reset' },
+      /*LANG*/'< Back': () => {
         showMenu();
       }
     };
@@ -121,7 +109,7 @@
     });
     E.showMenu(menu);
   }
-  
+
   loadSettings();
   showMenu();
 })
