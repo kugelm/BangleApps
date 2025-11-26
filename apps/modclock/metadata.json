@@ -3,10 +3,11 @@
   "name": "Modern Clock",
   "shortName":"Modern Clk",
   "icon": "icon.png",
-  "version":"0.04",
+  "version":"0.05",
   "description": "A modern, simple clock, with three ClockInfos and Fast Loading",
   "type":"clock",    
   "tags": "clock,clkinfo",
+  "author":"RKBoss6",
   "supports": ["BANGLEJS2"],
   "screenshots" : [ { "url":"Scr1.png" }, 
     { "url":"Scr2.png" }  ],
@@ -15,6 +16,10 @@
   "readme":"README.md",
   "storage": [
     {"name":"modclock.app.js","url":"app.js"},
-    {"name":"modclock.img","url":"app-icon.js","evaluate":true}
+    {"name":"modclock.img","url":"app-icon.js","evaluate":true},
+    {"name":"modclock.settings.js","url":"settings.js"}
+  ],
+  "data": [
+    {"name":"modclock.settings.json"} 
   ]
 }

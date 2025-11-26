@@ -1,3 +1,4 @@
+
 Bangle.loadWidgets();
 Bangle.drawWidgets();
 
@@ -171,8 +172,9 @@ function alertsMenu() {
       }
     },
     /*LANG*/"Quiet Mode": {
-      value: settings.quiet|0,
-      format: v => [/*LANG*/"Off", /*LANG*/"Alarms", /*LANG*/"Silent"][v%3],
+      value: (settings.quiet|0)%3,
+      min:0, max:2,
+      format: v => [/*LANG*/"Off", /*LANG*/"Alarms", /*LANG*/"Silent"][v],
       onchange: v => {
         settings.quiet = v%3;
         updateSettings();
@@ -191,7 +193,7 @@ function BLEMenu() {
   var hidN = [/*LANG*/"Off", /*LANG*/"Kbrd & Media", /*LANG*/"Kbrd", /*LANG*/"Kbrd & Mouse", /*LANG*/"Joystick"];
   var privacy = [/*LANG*/"Off", /*LANG*/"Show name", /*LANG*/"Hide name"];
 
-  return {
+  var menu = {
     '': { 'title': /*LANG*/'Bluetooth' },
     '< Back': ()=>popMenu(mainMenu()),
     /*LANG*/'Make Connectable': ()=>makeConnectable(),
@@ -209,7 +211,32 @@ function BLEMenu() {
         updateSettings();
       }
     },
-    /*LANG*/'Privacy': {
+    /*LANG*/'HID': {
+      value: Math.max(0,0 | hidV.indexOf(settings.HID)),
+      min: 0, max: hidN.length-1,
+      format: v => hidN[v],
+      onchange: v => {
+        settings.HID = hidV[v];
+        updateSettings();
+      }
+    },
+    /*LANG*/'Passkey': {
+      value: settings.passkey?settings.passkey:/*LANG*/"none",
+      onchange: () => setTimeout(() => pushMenu(passkeyMenu())) // graphical_menu redraws after the call
+    },
+    /*LANG*/'Whitelist': {
+      value:
+        (
+          (settings.whitelist_disabled || !settings.whitelist) ? /*LANG*/"Off" : /*LANG*/"On"
+        ) + (
+          settings.whitelist
+          ? " (" + settings.whitelist.length + ")"
+          : ""
+        ),
+      onchange: () => setTimeout(() => pushMenu(whitelistMenu())) // graphical_menu redraws after the call
+    }
+  };
+  if (BANGLEJS2) menu[/*LANG*/'Privacy'] = {
       min: 0, max: privacy.length-1,
       format: v => privacy[v],
       value: (() => {
@@ -234,32 +261,8 @@ function BLEMenu() {
         }
         updateSettings();
       }
-    },
-    /*LANG*/'HID': {
-      value: Math.max(0,0 | hidV.indexOf(settings.HID)),
-      min: 0, max: hidN.length-1,
-      format: v => hidN[v],
-      onchange: v => {
-        settings.HID = hidV[v];
-        updateSettings();
-      }
-    },
-    /*LANG*/'Passkey': {
-      value: settings.passkey?settings.passkey:/*LANG*/"none",
-      onchange: () => setTimeout(() => pushMenu(passkeyMenu())) // graphical_menu redraws after the call
-    },
-    /*LANG*/'Whitelist': {
-      value:
-        (
-          (settings.whitelist_disabled || !settings.whitelist) ? /*LANG*/"off" : /*LANG*/"on"
-        ) + (
-          settings.whitelist
-          ? " (" + settings.whitelist.length + ")"
-          : ""
-        ),
-      onchange: () => setTimeout(() => pushMenu(whitelistMenu())) // graphical_menu redraws after the call
-    }
-  };
+    };
+  return menu;
 }
 
 function showThemeMenu(pop) {
@@ -474,11 +477,11 @@ function LCDMenu() {
   Object.assign(lcdMenu, {
     /*LANG*/'LCD Brightness': {
       value: settings.brightness,
-      min: 0.1,
+      min : BANGLEJS2 ? 0 : 0.1,
       max: 1,
       step: 0.1,
       onchange: v => {
-        settings.brightness = v || 1;
+        settings.brightness = v ?? 1;
         updateSettings();
         Bangle.setLCDBrightness(settings.brightness);
       }

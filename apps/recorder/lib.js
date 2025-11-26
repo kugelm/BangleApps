@@ -61,18 +61,45 @@ exports.getRecorders = function() {
       };
     },
     hrm:function() {
-      var bpm = "", bpmConfidence = "", src="";
+      const CONFIDENCE_THRESHOLD = 80;
+      var avgBpm = 0, avgBpmConfidence = 0, src="", nAvgReadings=0, lowConfBpm=null, lowConfBpmConfidence=-1;
+
       function onHRM(h) {
-        bpmConfidence = h.confidence;
-        bpm = h.bpm;
+        let newBpmConfidence = h.confidence;
+        let newBpm = h.bpm;
         src = h.src;
+
+        if (newBpmConfidence >= CONFIDENCE_THRESHOLD){
+          nAvgReadings++;
+          avgBpm = avgBpm + (newBpm-avgBpm)/nAvgReadings;
+          avgBpmConfidence = avgBpmConfidence + (newBpmConfidence-avgBpmConfidence)/nAvgReadings;
+
+        } else if (newBpmConfidence > lowConfBpmConfidence) {
+          lowConfBpmConfidence = newBpmConfidence;
+          lowConfBpm = newBpm;
+        }
       }
+
       return {
         name : "HR",
         fields : ["Heartrate", "Confidence", "Source"],
         getValues : () => {
-          var r = [bpm,bpmConfidence,src];
-          bpm = ""; bpmConfidence = ""; src="";
+          let r;
+
+          if (nAvgReadings === 0) {
+            if (lowConfBpm === null) r = ["","",""];
+            else r = [lowConfBpm,lowConfBpmConfidence,src];
+          } else {
+            r = [Math.round(avgBpm),Math.round(avgBpmConfidence),src];
+          }
+
+          avgBpm = 0; 
+          avgBpmConfidence = 0; 
+          nAvgReadings=0; 
+          lowConfBpm=null; 
+          lowConfBpmConfidence=-1;
+          src=""; 
+
           return r;
         },
         start : () => {
@@ -112,6 +139,28 @@ exports.getRecorders = function() {
         },
         start : () => { lastSteps = Bangle.getStepCount(); },
         stop : () => {},
+        draw : (x,y) => g.reset().drawImage(atob("DAwBAAMMeeeeeeeecOMMAAMMMMAA"),x,y)
+      };
+    },
+    accel:function() {
+      var ax=0,ay=0,az=0,n=0;
+      function onAccel(a) {
+        ax += a.x;
+        ay += a.y;
+        az += a.z;
+        n++;
+      }
+      return {
+        name : "Accel",
+        fields : ["Accel X", "Accel Y", "Accel Z"],
+        getValues : () => {
+          if (n<1) n=1;
+          var r = [(ax/n).toFixed(2), (ay/n).toFixed(2), (az/n).toFixed(2)];
+          n = ax = ay = az = 0;
+          return r;
+        },
+        start : () => { Bangle.on('accel', onAccel); },
+        stop : () => { Bangle.removeListener('accel', onAccel); },
         draw : (x,y) => g.reset().drawImage(atob("DAwBAAMMeeeeeeeecOMMAAMMMMAA"),x,y)
       };
     }

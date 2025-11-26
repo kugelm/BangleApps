@@ -13,7 +13,9 @@ global.sleeplog = {
     minConsec: 18E5, // [ms] minimal time to count for consecutive sleep
     deepTh: 150, //     threshold for deep sleep
     lightTh: 300, //    threshold for light sleep
-    wearTemp: 19.5, //    temperature threshold to count as worn
+    wearTemp: 19.5,
+    hrmDeepTh: 60,
+    hrmLightTh: 74
   }, require("Storage").readJSON("sleeplog.json", true) || {})
 };
 
@@ -149,20 +151,24 @@ if (global.sleeplog.conf.enabled) {
     // define health listener function
     // - called by event listener: "this"-reference points to global
     health: function(data) {
+      print("Sleep Log - Health Data Acquired");
       // check if global variable accessable
       if (!global.sleeplog) return new Error("sleeplog: Can't process health event, global object missing!");
-
       // check if movement is available
-      if (!data.movement) return;
-
+      if (!data.movement&&!data.bpm) return;
       // add timestamp rounded to 10min, corrected to 10min ago
       data.timestamp = data.timestamp || ((Date.now() / 6E5 | 0) - 1) * 6E5;
-
       // add preliminary status depending on charging and movement thresholds
       // 1 = not worn, 2 = awake, 3 = light sleep, 4 = deep sleep
-      data.status = Bangle.isCharging() ? 1 :
-        data.movement <= global.sleeplog.conf.deepTh ? 4 :
-        data.movement <= global.sleeplog.conf.lightTh ? 3 : 2;
+      if(data.bpm){
+        data.status = Bangle.isCharging() ? 1 :
+          data.bpm <= global.sleeplog.conf.hrmDeepTh ? 4 :
+          data.bpm <= global.sleeplog.conf.hrmLightTh ? 3 : 2;
+      }else{
+        data.status = Bangle.isCharging() ? 1 :
+          data.movement <= global.sleeplog.conf.deepTh ? 4 :
+          data.movement <= global.sleeplog.conf.lightTh ? 3 : 2;
+      }
 
       // check if changing to deep sleep from non sleeping
       if (data.status === 4 && global.sleeplog.status <= 2) {

@@ -23,6 +23,7 @@ exports.loadSettings = function() {
       hrmOn : 0, // 0(Always), 1(Tap)
       defocusOnLock : true,
       maxAltitude : 3000,
+      haptics:true,
       apps : {}
     },
     require("Storage").readJSON("clock_info.json",1)||{}
@@ -39,22 +40,24 @@ exports.load = function() {
   var hrm = 0;
   var alt = "--";
   // callbacks (needed for easy removal of listeners)
-  function batteryUpdateHandler() { bangleItems[0].emit("redraw"); }
-  function stepUpdateHandler() { bangleItems[1].emit("redraw"); }
+  function batteryUpdateHandler() { bangleItems.find(i=>i.name=="Battery").emit("redraw"); }
+  function stepUpdateHandler() { bangleItems.find(i=>i.name=="Steps").emit("redraw"); }
   function hrmUpdateHandler(e) {
     if (e && e.confidence>60) hrm = Math.round(e.bpm);
-    bangleItems[2].emit("redraw");
+    bangleItems.find(i=>i.name=="HRM").emit("redraw");
   }
   function altUpdateHandler() {
     try {
       Bangle.getPressure().then(data=>{
         if (!data) return;
-        alt = Math.round(data.altitude) + "m";
-        bangleItems[3].emit("redraw");
+
+        alt =require("locale").distance(data.altitude);
+        bangleItems.find(i=>i.name=="Altitude").emit("redraw");
       });
     } catch (e) {
       print("Caught "+e+"\n in function altUpdateHandler in module clock_info");
-      bangleItems[3].emit('redraw');}
+      bangleItems.find(i=>i.name=="Altitude").emit('redraw');
+    }
   }
   // actual menu
   var menu = [{
@@ -120,7 +123,6 @@ exports.load = function() {
       },
     },
     { name: "BLE",
-      hasRange: false,
       isOn: () => {
         const s = NRF.getSecurityStatus();
         return s.advertising || s.connected;
@@ -156,6 +158,7 @@ exports.load = function() {
         min : 0, max : settings.maxAltitude,
         img : atob("GBiBAAAAAAAAAAAAAAAAAAAAAAACAAAGAAAPAAEZgAOwwAPwQAZgYAwAMBgAGBAACDAADGAABv///////wAAAAAAAAAAAAAAAAAAAA==")
       }),
+      run : function() { alt = "--"; this.emit("redraw"); altUpdateHandler(); },
       show : function() { this.interval = setInterval(altUpdateHandler, 60000); alt = "--"; altUpdateHandler(); },
       hide : function() { clearInterval(this.interval); delete this.interval; },
     });
@@ -291,6 +294,7 @@ exports.addInteractive = function(menu, options) {
     var oldMenuItem;
     if (ud) {
       if (menu[options.menuA].items.length==1) return; // 1 item - can't move
+      if(settings.haptics) Bangle.buzz(30);
       oldMenuItem = menu[options.menuA].items[options.menuB];
       options.menuB += ud;
       if (options.menuB<0) options.menuB = menu[options.menuA].items.length-1;
@@ -298,6 +302,7 @@ exports.addInteractive = function(menu, options) {
     } else if (lr) {
       if (menu.length==1) return; // 1 item - can't move
       oldMenuItem = menu[options.menuA].items[options.menuB];
+      if(settings.haptics) Bangle.buzz(44);
       do {
         options.menuA += lr;
         if (options.menuA<0) options.menuA = menu.length-1;
@@ -353,7 +358,7 @@ exports.addInteractive = function(menu, options) {
       if (!options.focus) {
         focus();
       } else if (menu[options.menuA].items[options.menuB].run) {
-        Bangle.buzz(100, 0.7);
+        if(settings.haptics) Bangle.buzz(100, 0.7);
         menu[options.menuA].items[options.menuB].run(options); // allow tap on an item to run it (eg home assistant)
       }
     };

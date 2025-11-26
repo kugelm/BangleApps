@@ -14,7 +14,7 @@
 
 // a message
 require("messages").pushMessage({"t":"add","id":1575479849,"src":"WhatsApp","title":"My Friend","body":"Hey! How's everything going?",reply:1,negative:1})
-require("messages").pushMessage({"t":"add","id":1575479849,"src":"Skype","title":"My Friend","body":"Hey! How's everything going? This is a really really long message that is really so super long you'll have to scroll it lots and lots",positive:1,negative:1})
+require("messages").pushMessage({"t":"add","id":1575479850,"src":"Skype","title":"My Friend","body":"Hey! How's everything going? This is a really really long message that is really so super long you'll have to scroll it lots and lots",positive:1,negative:1})
 require("messages").pushMessage({"t":"add","id":23232,"src":"Skype","title":"Mr. Bobby McBobFace","body":"Boopedy-boop",positive:1,negative:1})
 require("messages").pushMessage({"t":"add","id":23233,"src":"Skype","title":"Thyttan test","body":"Nummerplåtsbelysning trodo",positive:1,negative:1})
 require("messages").pushMessage({"t":"add","id":23234,"src":"Skype","title":"Thyttan test 2","body":"Nummerplåtsbelysning trodo Nummerplåtsbelysning trodo Nummerplåtsbelysning trodo Nummerplåtsbelysning trodo Nummerplåtsbelysning trodo Nummerplåtsbelysning trodo",positive:1,negative:1})
@@ -361,12 +361,12 @@ function showMessage(msgid, persist) {
   active = "message";
   // Normal text message display
   let src=msg.src||/*LANG*/"Message", srcFont = fontSmall;
-  let title=msg.title, titleFont = fontLarge, lines;
+  let title=msg.title||"", titleFont = fontLarge, lines=[];
   let body=msg.body, bodyFont = fontLarge;
   // If no body, use the title text instead...
-  if (body===undefined) {
+  if (!body) {
     body = title;
-    title = undefined;
+    title = "";
   }
   if (g.setFont(srcFont).stringWidth(src) > g.getWidth()-52)
     srcFont = "4x6";
@@ -392,6 +392,8 @@ function showMessage(msgid, persist) {
     }
     lines = g.setFont(bodyFont).wrapString(body, w);
   }
+  // By this point, `title` must be a string and `lines` must be an array of strings.
+  // Either or both can be empty, but neither can be `undefined` (#3969).
   let negHandler,posHandler,rowLeftDraw,rowRightDraw;
   if (msg.negative) {
     negHandler = ()=>{
